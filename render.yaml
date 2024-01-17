@@ -1,0 +1,28 @@
+services:
+  - type: web
+    name: Save Restricted Content
+    runtime: python
+    region: singapore
+    branch: master
+    rootDir: .
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn web.app:app & python3 -m worker
+    autoDeploy: false
+
+    envVars:
+      - key: BOT_TOKEN
+        sync: false
+      - key: API_HASH 
+        value: ed4ebfb1e1bd63810aecf4cac75a1e00
+      - key: API_ID 
+        value: 14166815
+      - key: CHANNEL_ID 
+        sync: false
+      - key: CHANNEL_NAME 
+        sync: false
+      - key: BOT_NAME
+        sync: false
+      - key: STRING
+        sync: false
+
+    plan: free
