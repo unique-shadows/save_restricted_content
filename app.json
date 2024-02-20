@@ -1,0 +1,46 @@
+{
+    "name": "Save Restricted Content",
+    "description": "This bot is used to save restricted content from telegram",
+
+    "keywords": [
+      "Save bot",
+      "Restricted bot"
+    ],
+
+    "env": {
+      "BOT_TOKEN": {
+        "description": "Your telegram bot token",
+        "required": true
+      },
+      "API_HASH": {
+        "description": "Get this value from https://my.telegram.org",
+        "required": true
+      },
+      "API_ID": {
+        "description": "Get this value from https://my.telegram.org",
+        "required": true
+      },
+      "STRING": {
+        "description": "Your pyrogram session string",
+        "required": true
+      },
+      "CHANNEL_ID": {
+        "description": "Force subscribe channel ID",
+        "required": true
+      },
+      "CHANNEL_NAME": {
+        "description": "Username of the channel",
+        "required": true
+      },
+      "FOOTER": {
+        "description": "Add a footer to your message",
+        "required": true
+      }
+    },
+
+    "buildpacks": [
+      {
+        "url": "https://github.com/heroku/heroku-buildpack-python.git"
+      }
+    ]
+  }
