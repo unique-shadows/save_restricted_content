@@ -4,6 +4,9 @@ from pyrogram.errors import UserAlreadyParticipant, InviteHashExpired, UsernameN
 import time
 import os
 import threading
+from dotenv import load_dotenv
+
+load_dotenv('config.env')
 
 bot_token = os.getenv("BOT_TOKEN") 
 api_hash = os.getenv("API_HASH") 
@@ -11,6 +14,7 @@ api_id = os.getenv("API_ID")
 ss = os.getenv("STRING")
 channel_id = int(os.getenv("CHANNEL_ID"))
 channel_name = os.getenv("CHANNEL_NAME")
+footer = os.getenv("FOOTER")
 
 
 bot = Client("mybot", api_id=api_id, api_hash=api_hash, bot_token=bot_token)
@@ -169,7 +173,7 @@ def handle_private(message: pyrogram.types.messages_and_media.message.Message, c
 		msg_type = get_message_type(msg)
 
 		if "Text" == msg_type:
-			bot.send_message(message.chat.id, msg.text, entities=msg.entities, reply_to_message_id=message.id)
+			bot.send_message(message.chat.id, msg.text + '\n' + footer, entities=msg.entities, reply_to_message_id=message.id)
 			return
 
 		smsg = bot.send_message(message.chat.id, '__Downloading__', reply_to_message_id=message.id)
@@ -186,7 +190,7 @@ def handle_private(message: pyrogram.types.messages_and_media.message.Message, c
 				thumb = acc.download_media(msg.document.thumbs[0].file_id)
 			except: thumb = None
 			
-			bot.send_document(message.chat.id, file, thumb=thumb, caption=msg.caption, caption_entities=msg.caption_entities, reply_to_message_id=message.id, progress=progress, progress_args=[message,"up"])
+			bot.send_document(message.chat.id, file, thumb=thumb, caption=msg.caption + '\n' + footer, caption_entities=msg.caption_entities, reply_to_message_id=message.id, progress=progress, progress_args=[message,"up"])
 			if thumb != None: os.remove(thumb)
 
 		elif "Video" == msg_type:
@@ -194,7 +198,7 @@ def handle_private(message: pyrogram.types.messages_and_media.message.Message, c
 				thumb = acc.download_media(msg.video.thumbs[0].file_id)
 			except: thumb = None
 
-			bot.send_video(message.chat.id, file, duration=msg.video.duration, width=msg.video.width, height=msg.video.height, thumb=thumb, caption=msg.caption, caption_entities=msg.caption_entities, reply_to_message_id=message.id, progress=progress, progress_args=[message,"up"])
+			bot.send_video(message.chat.id, file, duration=msg.video.duration, width=msg.video.width, height=msg.video.height, thumb=thumb, caption=msg.caption + '\n' + footer, caption_entities=msg.caption_entities, reply_to_message_id=message.id, progress=progress, progress_args=[message,"up"])
 			if thumb != None: os.remove(thumb)
 
 		elif "Animation" == msg_type:
@@ -204,18 +208,18 @@ def handle_private(message: pyrogram.types.messages_and_media.message.Message, c
 			bot.send_sticker(message.chat.id, file, reply_to_message_id=message.id)
 
 		elif "Voice" == msg_type:
-			bot.send_voice(message.chat.id, file, caption=msg.caption, thumb=thumb, caption_entities=msg.caption_entities, reply_to_message_id=message.id, progress=progress, progress_args=[message,"up"])
+			bot.send_voice(message.chat.id, file, caption=msg.caption + '\n' + footer, thumb=thumb, caption_entities=msg.caption_entities, reply_to_message_id=message.id, progress=progress, progress_args=[message,"up"])
 
 		elif "Audio" == msg_type:
 			try:
 				thumb = acc.download_media(msg.audio.thumbs[0].file_id)
 			except: thumb = None
 				
-			bot.send_audio(message.chat.id, file, caption=msg.caption, caption_entities=msg.caption_entities, reply_to_message_id=message.id, progress=progress, progress_args=[message,"up"])   
+			bot.send_audio(message.chat.id, file, caption=msg.caption + '\n' + footer, caption_entities=msg.caption_entities, reply_to_message_id=message.id, progress=progress, progress_args=[message,"up"])   
 			if thumb != None: os.remove(thumb)
 
 		elif "Photo" == msg_type:
-			bot.send_photo(message.chat.id, file, caption=msg.caption, caption_entities=msg.caption_entities, reply_to_message_id=message.id)
+			bot.send_photo(message.chat.id, file, caption=msg.caption + '\n' + footer, caption_entities=msg.caption_entities, reply_to_message_id=message.id)
 
 		os.remove(file)
 		if os.path.exists(f'{message.id}upstatus.txt'): os.remove(f'{message.id}upstatus.txt')
