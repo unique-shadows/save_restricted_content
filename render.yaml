@@ -11,17 +11,11 @@ services:
 
     envVars:
       - key: BOT_TOKEN
-        sync: false
+        value: 6836248686:AAErCDsKUtIqRAoenn6_USAH3dfM0Pz_9Ac
       - key: API_HASH 
         value: ed4ebfb1e1bd63810aecf4cac75a1e00
       - key: API_ID 
         value: 14166815
-      - key: CHANNEL_ID 
-        sync: false
-      - key: CHANNEL_NAME 
-        sync: false
-      - key: BOT_NAME
-        sync: false
       - key: STRING
         sync: false
 

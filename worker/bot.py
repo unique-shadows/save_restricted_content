@@ -12,10 +12,6 @@ bot_token = os.getenv("BOT_TOKEN")
 api_hash = os.getenv("API_HASH") 
 api_id = os.getenv("API_ID")
 ss = os.getenv("STRING")
-channel_id = int(os.getenv("CHANNEL_ID"))
-channel_name = os.getenv("CHANNEL_NAME")
-footer = os.getenv("FOOTER")
-
 
 bot = Client("mybot", api_id=api_id, api_hash=api_hash, bot_token=bot_token)
 
@@ -67,106 +63,73 @@ def progress(current, total, message, type):
 # start command
 @bot.on_message(filters.command(["start"]))
 def send_start(client: pyrogram.client.Client, message: pyrogram.types.messages_and_media.message.Message):
-	user_id = message.from_user.id
-	
-	try:
-		client.get_chat_member(chat_id= channel_id, user_id=user_id)
-		set_flag = True
-	except UserNotParticipant as e:
-		set_flag = False
-
-	if set_flag:
-		bot.send_message(message.chat.id, f"__👋 Hi **{message.from_user.mention}**, I am Save Restricted Bot, I can send you restricted content by it's post link__\n\n{USAGE}",
-				   reply_to_message_id=message.id)
-
-	else:
-		bot.send_message(message.chat.id, f"__👋 Hi **{message.from_user.mention}**, I am Save Restricted Bot\nPlease join our channel @{channel_name} to use",
+	bot.send_message(message.chat.id, f"__👋 Hi **{message.from_user.mention}**, I am Save Restricted Bot, I can send you restricted content by it's post link__\n\n{USAGE}",
 				   reply_to_message_id=message.id)
 
 @bot.on_message(filters.text)
 def save(client: pyrogram.client.Client, message: pyrogram.types.messages_and_media.message.Message):
-	user_id = message.from_user.id
-	try:
-		client.get_chat_member(chat_id= channel_id, user_id=user_id)
-		set_flag = True
-	except UserNotParticipant as e:
-		set_flag = False
-
-	if set_flag:
-		# joining chats
-		if "https://t.me/+" in message.text or "https://t.me/joinchat/" in message.text:
-
-			if acc is None:
-				bot.send_message(message.chat.id,f"**String Session is not Set**", reply_to_message_id=message.id)
+	if "https://t.me/+" in message.text or "https://t.me/joinchat/" in message.text:
+		if acc is None:
+			bot.send_message(message.chat.id,f"**String Session is not Set**", reply_to_message_id=message.id)
+			return
+		
+		try:
+			try: acc.join_chat(message.text)
+			except Exception as e: 
+				bot.send_message(message.chat.id,f"**Error** : __{e}__", reply_to_message_id=message.id)
 				return
+			bot.send_message(message.chat.id,"**Chat Joined**", reply_to_message_id=message.id)
+		except UserAlreadyParticipant:
+			bot.send_message(message.chat.id,"**Chat alredy Joined**", reply_to_message_id=message.id)
+		except InviteHashExpired:
+			bot.send_message(message.chat.id,"**Invalid Link**", reply_to_message_id=message.id)
+	# getting message
 
-			try:
-				try: acc.join_chat(message.text)
-				except Exception as e: 
-					bot.send_message(message.chat.id,f"**Error** : __{e}__", reply_to_message_id=message.id)
-					return
-				bot.send_message(message.chat.id,"**Chat Joined**", reply_to_message_id=message.id)
-			except UserAlreadyParticipant:
-				bot.send_message(message.chat.id,"**Chat alredy Joined**", reply_to_message_id=message.id)
-			except InviteHashExpired:
-				bot.send_message(message.chat.id,"**Invalid Link**", reply_to_message_id=message.id)
-
-		# getting message
-		elif "https://t.me/" in message.text:
-
-			datas = message.text.split("/")
-			temp = datas[-1].replace("?single","").split("-")
-			fromID = int(temp[0].strip())
-			try: toID = int(temp[1].strip())
-			except: toID = fromID
-
-			for msgid in range(fromID, toID+1):
-
-				# private
-				if "https://t.me/c/" in message.text:
-					chatid = int("-100" + datas[4])
-					
-					if acc is None:
-						bot.send_message(message.chat.id,f"**String Session is not Set**", reply_to_message_id=message.id)
-						return
-					
-					handle_private(message,chatid,msgid)
-					# try: handle_private(message,chatid,msgid)
-					# except Exception as e: bot.send_message(message.chat.id,f"**Error** : __{e}__", reply_to_message_id=message.id)
+	elif "https://t.me/" in message.text:
+		datas = message.text.split("/")
+		temp = datas[-1].replace("?single","").split("-")
+		fromID = int(temp[0].strip())
+		try: toID = int(temp[1].strip())
+		except: toID = fromID
+		for msgid in range(fromID, toID+1):
+			# private
+			if "https://t.me/c/" in message.text:
+				chatid = int("-100" + datas[4])
 				
-				# bot
-				elif "https://t.me/b/" in message.text:
-					username = datas[4]
-					
+				if acc is None:
+					bot.send_message(message.chat.id,f"**String Session is not Set**", reply_to_message_id=message.id)
+					return
+				
+				handle_private(message,chatid,msgid)
+				# try: handle_private(message,chatid,msgid)
+				# except Exception as e: bot.send_message(message.chat.id,f"**Error** : __{e}__", reply_to_message_id=message.id)
+			
+			# bot
+			elif "https://t.me/b/" in message.text:
+				username = datas[4]
+				
+				if acc is None:
+					bot.send_message(message.chat.id,f"**String Session is not Set**", reply_to_message_id=message.id)
+					return
+				try: handle_private(message,username,msgid)
+				except Exception as e: bot.send_message(message.chat.id,f"**Error** : __{e}__", reply_to_message_id=message.id)
+			# public
+			else:
+				username = datas[3]
+				try: msg  = bot.get_messages(username,msgid)
+				except UsernameNotOccupied: 
+					bot.send_message(message.chat.id,f"**The username is not occupied by anyone**", reply_to_message_id=message.id)
+					return
+				try: bot.copy_message(message.chat.id, msg.chat.id, msg.id,reply_to_message_id=message.id)
+				except:
 					if acc is None:
 						bot.send_message(message.chat.id,f"**String Session is not Set**", reply_to_message_id=message.id)
 						return
 					try: handle_private(message,username,msgid)
 					except Exception as e: bot.send_message(message.chat.id,f"**Error** : __{e}__", reply_to_message_id=message.id)
+			# wait time
+			time.sleep(3)
 
-				# public
-				else:
-					username = datas[3]
-
-					try: msg  = bot.get_messages(username,msgid)
-					except UsernameNotOccupied: 
-						bot.send_message(message.chat.id,f"**The username is not occupied by anyone**", reply_to_message_id=message.id)
-						return
-
-					try: bot.copy_message(message.chat.id, msg.chat.id, msg.id,reply_to_message_id=message.id)
-					except:
-						if acc is None:
-							bot.send_message(message.chat.id,f"**String Session is not Set**", reply_to_message_id=message.id)
-							return
-						try: handle_private(message,username,msgid)
-						except Exception as e: bot.send_message(message.chat.id,f"**Error** : __{e}__", reply_to_message_id=message.id)
-
-				# wait time
-				time.sleep(3)
-
-	else:
-		bot.send_message(message.chat.id, f"__👋 Hi **{message.from_user.mention}**, I am Save Restricted Bot\nPlease join our channel @{channel_name} to use",
-				   reply_to_message_id=message.id)
 # handle private
 def handle_private(message: pyrogram.types.messages_and_media.message.Message, chatid: int, msgid: int):
 		msg: pyrogram.types.messages_and_media.message.Message = acc.get_messages(chatid,msgid)
